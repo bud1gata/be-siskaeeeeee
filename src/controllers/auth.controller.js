@@ -1,69 +1,62 @@
+const {isEmpty} = require('lodash')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
 const { TOKEN_SECRET, TOKEN_ALGORITMA } = process.env
-// const authModel = require('../models/auth')
+
+//model
+const authModel = require('../models/auth.model') 
 
 module.exports = {
 
-  signIn: async (request, response) => {
-    const { email, password } = request.body
-    const isLoginLogs = await logsModel.getCheckLogin({ user_email: email })
-    if (isLoginLogs.length > 0) {
-      if (isLoginLogs[0].user_email === email) {
-        const data = {
-          success: false,
-          message: 'user has logged in'
-        }
-        response.status(400).send(data)
-      }
-    } else {
-      const isFound = await authModel.getAuthCondition({ email })
-      if (isFound.length > 0) {
-        const isFoundPassword = isFound[0].password
+  signIn: async (req, res) => {
+
+    //request form
+    const { email, password } = req.body
+    
+      //check if email found / data
+      const isFoundEmail = await authModel.getAuthCondition({ email })
+      if (isFoundEmail.length > 0) { // if email found compare password 
+        const isFoundPassword = isFoundEmail[0].password // get password
+
+        // compare password
         await bcrypt.compare(password, isFoundPassword, function (error, isMatch) {
           if (error) {
             const data = {
               success: false,
               message: 'Failed match password'
             }
-            response.status(400).send(data)
+            res.status(400).send(data)
           } else if (!isMatch) {
             const data = {
               success: false,
               message: 'Password not match'
             }
-            response.status(401).send(data)
+            res.status(401).send(data)
           } else {
+
+            //show data and sign token
             const payload = {
-              id: isFound[0].id,
-              email: isFound[0].email,
-              role: isFound[0].nameRole,
-              nameUser: isFound[0].nameUser
+              id: isFoundEmail[0].id,
+              email: isFoundEmail[0].email,
+              role: isFoundEmail[0].nameRole,
             }
             const token = jwt.sign(payload, TOKEN_SECRET,
               {
                 expiresIn: '24h',
                 algorithm: TOKEN_ALGORITMA
               })
-            const isLoginLogsData = {
-              user_email: email,
-              type: 0,
-              description: 'login',
-              status: 0
-            }
-            logsModel.createLogsLogin(isLoginLogsData)
             const data = {
               success: true,
               message: 'Password Match',
               userData: {
-                id: isFound[0].id,
-                email: isFound[0].email,
-                role: isFound[0].nameRole
+                id: isFoundEmail[0].id,
+                email: isFoundEmail[0].email,
+                role: isFoundEmail[0].nameRole
               },
               token: token
             }
-            response.status(200).header('Authorization', token).send(data)
+            res.status(200).header('Authorization', token).send(data)
           }
         })
       } else {
@@ -71,8 +64,40 @@ module.exports = {
           success: false,
           message: 'Not Found Email'
         }
-        response.status(400).send(data)
+        res.status(400).send(data)
       }
+  },
+
+  signUp: async (req, res) => {
+    const { email, password } = req.body
+    const passwordHash = await bcrypt.hash(password, saltRounds)
+    const isExist = await authModel.getAuthCondition({ email })
+    if (isEmpty(isExist)) {
+      const registerData = {
+        email,
+        password: passwordHash
+      }
+      const results = await authModel.signUp(registerData)
+      if (results) {
+        const data = {
+          success: true,
+          message: 'Register success',
+          data: registerData.email
+        }
+        res.status(201).send(data)
+      } else {
+        const data = {
+          success: false,
+          message: 'Failed register'
+        }
+        res.status(400).send(data)
+      }
+    } else {
+      const data = {
+        success: false,
+        message: 'Email is exist, please use another email'
+      }
+      res.status(400).send(data)
     }
   },
 
