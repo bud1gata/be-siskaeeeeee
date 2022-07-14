@@ -5,5 +5,8 @@ const sdmController = require("../controllers/sdm.controller");
 
 router
   .post("/create", sdmController.createSdm)
+  .patch("/:id", sdmController.updateSdm)
+  .delete("/:id", sdmController.deleteSdm)
+  .get("/", sdmController.getAllSdm)
 
 module.exports = router;

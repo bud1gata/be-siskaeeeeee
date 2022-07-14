@@ -21,8 +21,10 @@ app.get('/', (request, response) => {
 
 // route
 const auth = require('./src/routes/auth.route')
+const sdm = require('./src/routes/sdm.route')
 
 app.use('/auth', auth)
+app.use('/sdm', sdm)
 
 // page notfound
 app.get('*', (request, response) => {

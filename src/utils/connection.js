@@ -7,11 +7,13 @@ const connection = mysql.createConnection({
   user: DB_USER,
   password: DB_PASS,
   database: DB_NAME,
-  port: DB_PORT
+  port: DB_PORT,
+  insecureAuth : true
 })
 connection.connect(function (error) {
   if (error) {
     return connection.end()
+    // console.log(error)
   }
   console.log('DB is connect')
 })
