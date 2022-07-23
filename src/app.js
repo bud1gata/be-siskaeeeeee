@@ -1,5 +1,4 @@
-require('dotenv').config() // get .env
-const PORT = process.env.PORT || 3100
+const config = require('../src/config/env.config')
 const express = require('express')
 const bodyparser = require('body-parser')
 const cors = require('cors')
@@ -20,8 +19,8 @@ app.get('/', (request, response) => {
 })
 
 // route
-const auth = require('./src/routes/auth.route')
-const sdm = require('./src/routes/sdm.route')
+const auth = require('./routes/auth.route')
+const sdm = require('./routes/sdm.route')
 
 app.use('/auth', auth)
 app.use('/sdm', sdm)
@@ -29,11 +28,6 @@ app.use('/sdm', sdm)
 // page notfound
 app.get('*', (request, response) => {
   response.status(404).send('Page not found')
-})
-
-//start app
-app.listen(PORT, () => {
-  console.log('Server running')
 })
 
 module.exports = app
