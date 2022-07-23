@@ -16,7 +16,7 @@ module.exports = {
     
       //check if email found / data
       const isFoundEmail = await authModel.getAuthCondition({ email })
-      if (isFoundEmail.length > 0) { // if email found compare password 
+      if (!isEmpty(isFoundEmail)) { // if email found compare password 
         const isFoundPassword = isFoundEmail[0].password // get password
 
         // compare password
