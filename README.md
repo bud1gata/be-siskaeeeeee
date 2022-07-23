@@ -26,6 +26,7 @@ Clone the repo, install dependencies, and start the API server locally.
 ```shell
 git clone https://github.com/luthfidev/be-siskaeeeeee.git
 cd be-siskaeeeeee
+npm install
 npm start
 ```
 ***
